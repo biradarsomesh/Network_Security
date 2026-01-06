@@ -22,7 +22,7 @@ class DataIngestion:
         try:
             self.data_ingestion_config = data_ingestion_config
         except Exception as e:
-            raise NetworkSecurityException(e,sys)
+            raise NetworkSecurityException(e,sys) from e
         
     def get_data_from_mongo_db(self):
         '''
@@ -41,7 +41,7 @@ class DataIngestion:
             return df
 
         except Exception as e:
-            raise NetworkSecurityException(e,sys)
+            raise NetworkSecurityException(e,sys) from e
     
     def export_data_into_feture_store(self,dataframe:pd.DataFrame):
         try:
@@ -52,7 +52,7 @@ class DataIngestion:
             dataframe.to_csv(feature_store_file_path,index=False,header=True)
             return dataframe
         except Exception as e:
-            raise NetworkSecurityException(e,sys)
+            raise NetworkSecurityException(e,sys) from e
     
     def split_data_as_train_test(self,dataframe:pd.DataFrame):
         try:
@@ -74,7 +74,7 @@ class DataIngestion:
 
             logging.info('Exported train and test file path.')
         except Exception as e:
-            raise NetworkSecurityException(e,sys)
+            raise NetworkSecurityException(e,sys) from e
         
     def intiate_data_ingestion(self):
         try:
@@ -85,4 +85,4 @@ class DataIngestion:
                                                           test_file_path=self.data_ingestion_config.testing_file_path)
             return dataingestionartifact
         except Exception as e:
-            raise NetworkSecurityException(e,sys)
+            raise NetworkSecurityException(e,sys) from e

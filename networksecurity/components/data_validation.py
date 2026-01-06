@@ -17,7 +17,7 @@ class Datavalidation:
             self.data_validation_config = data_validation_config
             self.schema_config = read_yaml_file(SCHEMA_FILE_PATH)
         except Exception as e:
-            raise NetworkSecurityException(e,sys)
+            raise NetworkSecurityException(e,sys) from e
         
     @staticmethod   
     def read_data(file_path)-> pd.DataFrame:
@@ -36,7 +36,7 @@ class Datavalidation:
             else:
                 return False
         except Exception as e:
-            raise NetworkSecurityException(e,sys)
+            raise NetworkSecurityException(e,sys) from e
     
     def validate_numerical_columns(self,dataframe:pd.DataFrame) -> bool:
         try:
@@ -54,7 +54,7 @@ class Datavalidation:
             else:
                 return False
         except Exception as e:
-            raise NetworkSecurityException(e,sys)
+            raise NetworkSecurityException(e,sys) from e
 
     def detect_dataset_drift(self,base_df,current_df,threshhold=0.05)->bool:
         try:
@@ -81,7 +81,7 @@ class Datavalidation:
             write_yaml_file(file_path=drift_report_file_path,content=report)
 
         except Exception as e:
-            raise NetworkSecurityException(e,sys)
+            raise NetworkSecurityException(e,sys) from e
 
         
     def intiate_data_validation(self) -> DataValidationArtifact:
@@ -136,4 +136,4 @@ class Datavalidation:
             return data_validation_artifact
         
         except Exception as e:
-            raise NetworkSecurityException(e,sys)
+            raise NetworkSecurityException(e,sys) from e
