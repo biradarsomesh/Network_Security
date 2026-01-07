@@ -8,7 +8,7 @@ from networksecurity.entity.config_entity import ModelTrainerConfig
 from networksecurity.utils.main_utils.utils import save_object,load_object,load_numpy_arrray_data,evaluate_models
 from networksecurity.utils.ml_utils.metric.classification_metric import get_classification_score
 from networksecurity.utils.ml_utils.model.estimator import NetworkModel
-
+import mlflow
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import r2_score
 from sklearn.neighbors import KNeighborsClassifier
@@ -18,6 +18,8 @@ from sklearn.ensemble import(
     GradientBoostingClassifier,
     RandomForestClassifier
 )
+from sklearn.model_selection import ParameterGrid
+from mlflow.tracking import MlflowClient
 
 class ModelTrainer:
     def __init__(self,model_trainer_config:ModelTrainerConfig,data_transformation_artifact:DataTransformationArtifact):
@@ -27,6 +29,17 @@ class ModelTrainer:
         except Exception as e:
             raise NetworkSecurityException(e,sys) from e
     
+    def track_mlflow(self,best_model,classificationmetric):
+        with mlflow.start_run():
+            f1_score = classificationmetric.f1_score
+            precision_score = classificationmetric.precision_score
+            recall_score = classificationmetric.recall_score
+
+            mlflow.log_metric('f1_score',f1_score)
+            mlflow.log_metric('precision_score',precision_score)
+            mlflow.log_metric('recall_score',recall_score)
+            mlflow.sklearn.log_model(best_model,'model')
+
     def train_model(self,x_train,y_train,x_test,y_test):
         models = {
             'Random Forest': RandomForestClassifier(verbose=1),
@@ -83,10 +96,17 @@ class ModelTrainer:
         ]
         best_model = models[best_model_name]
         y_train_pred = best_model.predict(x_train)
+                
         classification_train_metric = get_classification_score(y_true=y_train,y_pred=y_train_pred)
         
+        # Track the mlflow
+        self.track_mlflow(best_model,classification_train_metric)
+
+
         y_test_pred = best_model.predict(x_test)
         classification_test_metric = get_classification_score(y_true=y_test,y_pred=y_test_pred)
+
+        self.track_mlflow(best_model,classification_train_metric)
 
         preprocessor = load_object(file_path=self.data_transformation_artifact.transformed_object_file_path)
         
